@@ -10,6 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,6 +28,7 @@ class EmployeeServiceImplTest {
     AutoCloseable autoCloseable;
     Employee employee;
     EmployeeDto employeeDto;
+
 
     @BeforeEach
     void setUp() {
@@ -45,6 +50,8 @@ class EmployeeServiceImplTest {
     @Test
     void testCreateEmployee() {
 
+        mock(EmployeeRepository.class);
+
         when(employeeRepository.save(any(Employee.class))).thenReturn(employee);
 
         EmployeeDto result = employeeService.createEmployee(employeeDto);
@@ -56,15 +63,30 @@ class EmployeeServiceImplTest {
     }
 
     @Test
-    void getEmployeeById() {
+    void testGetEmployeeById() {
+        mock(EmployeeRepository.class);
+        mock(Employee.class);
+
+        when(employeeRepository.findById(1L)).thenReturn(Optional.ofNullable(employee));
+
+        assertThat(employeeService.getEmployeeById(1L).getFirstName()).isEqualTo(employee.getFirstName());
+
     }
 
     @Test
     void getAllEmployees() {
+        mock(EmployeeRepository.class);
+        mock(Employee.class);
+
+        when(employeeRepository.findAll()).thenReturn(new ArrayList<Employee>(Collections.singleton(employee)));
+
+        assertThat(employeeService.getAllEmployees().get(0).getFirstName()).isEqualTo(employee.getFirstName());
+
     }
 
     @Test
     void updateEmployee() {
+
     }
 
     @Test
