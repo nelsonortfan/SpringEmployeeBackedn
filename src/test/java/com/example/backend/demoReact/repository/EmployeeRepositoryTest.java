@@ -47,5 +47,12 @@ public class EmployeeRepositoryTest {
         assertThat(3).isEqualTo(3);
     }
 
+    // Test Case Failure
+    @Test
+    void testFindByFirstName_NotFound(){
+        List<Employee> employeeList = repository.findByFirstName("Hector");
+        assertThat(employeeList.isEmpty()).isTrue();
+    }
+
 
 }
