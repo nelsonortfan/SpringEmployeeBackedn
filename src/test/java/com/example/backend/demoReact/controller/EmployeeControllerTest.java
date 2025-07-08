@@ -15,12 +15,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.springframework.http.MediaType;
 
 
 @WebMvcTest(EmployeeController.class)
@@ -59,9 +62,26 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void createEmployee() {
+    void createEmployee() throws Exception{
 
+        when(employeeService.createEmployee(any(EmployeeDto.class))).thenReturn(employeeDto1);
+
+        this.mockMvc.perform(post("/api/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                {
+                    "firstName": "Mauricio",
+                    "lastName": "Ortiz",
+                    "email": "mycorreo1@gmail.com"
+                }
+            """))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.firstName").value("Mauricio"))
+                .andExpect(jsonPath("$.email").value("mycorreo1@gmail.com"));
     }
+
 
     @Test
     void getEmployeeById() throws Exception {
