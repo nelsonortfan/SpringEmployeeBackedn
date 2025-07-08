@@ -17,6 +17,7 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -61,7 +62,15 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void getEmployeeById() {
+    void getEmployeeById() throws Exception {
+
+        when(employeeService.getEmployeeById(1L)).thenReturn(employeeDto1);
+
+        this.mockMvc.perform(get("/api/employees/1")).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.firstName").value("Mauricio"));
+
     }
 
     @Test
