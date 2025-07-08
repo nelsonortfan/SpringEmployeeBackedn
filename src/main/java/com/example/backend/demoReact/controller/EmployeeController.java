@@ -29,14 +29,12 @@ public class EmployeeController {
     @GetMapping("{id}")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable("id") Long employeeId){
         EmployeeDto employeeDto = employeeService.getEmployeeById(employeeId);
-        System.out.println("Hola");
         return ResponseEntity.ok(employeeDto);
     }
 
     // Build Get All Employees REST API
     @GetMapping
     public ResponseEntity<List<EmployeeDto>> getAllEmployees(){
-        System.out.println("Hola 2");
         List<EmployeeDto> employees = employeeService.getAllEmployees();
         return ResponseEntity.ok(employees);
     }
