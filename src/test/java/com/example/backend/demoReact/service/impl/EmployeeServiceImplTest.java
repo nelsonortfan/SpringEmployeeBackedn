@@ -2,11 +2,13 @@ package com.example.backend.demoReact.service.impl;
 
 import com.example.backend.demoReact.dto.EmployeeDto;
 import com.example.backend.demoReact.entity.Employee;
+import com.example.backend.demoReact.exception.ResourceNotFoundException;
 import com.example.backend.demoReact.repository.EmployeeRepository;
 import com.example.backend.demoReact.service.EmployeeService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -15,9 +17,9 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 
 class EmployeeServiceImplTest {
@@ -26,8 +28,8 @@ class EmployeeServiceImplTest {
     private EmployeeRepository employeeRepository;
     private EmployeeService employeeService;
     AutoCloseable autoCloseable;
-    Employee employee;
-    EmployeeDto employeeDto;
+    Employee employee, employeeUpdated;
+    EmployeeDto employeeDto, employeeDtoUpdate ;
 
 
     @BeforeEach
@@ -35,11 +37,17 @@ class EmployeeServiceImplTest {
         autoCloseable = MockitoAnnotations.openMocks(this);
         employeeService = new EmployeeServiceImpl(employeeRepository);
         employee = new Employee(1L, "Valentia", "Michi", "lamichi@gmail.com");
+        employeeUpdated = new Employee(employee.getId(), "Valentia", "Grisecita", "micorreodegato@gmail.com");
         employeeDto = new EmployeeDto();
         employeeDto.setId(employee.getId());
         employeeDto.setFirstName(employee.getFirstName());
         employeeDto.setLastName(employee.getLastName());
         employeeDto.setEmail(employee.getEmail());
+        employeeDtoUpdate = new EmployeeDto();
+        employeeDtoUpdate.setId(employeeUpdated.getId());
+        employeeDtoUpdate.setFirstName(employeeUpdated.getFirstName());
+        employeeDtoUpdate.setLastName(employeeUpdated.getLastName());
+        employeeDtoUpdate.setEmail(employeeDtoUpdate.getEmail());
     }
 
     @AfterEach
@@ -74,7 +82,22 @@ class EmployeeServiceImplTest {
     }
 
     @Test
-    void getAllEmployees() {
+    void testGetEmployeeByIdNotFoundException(){
+        mock(EmployeeRepository.class);
+        mock(Employee.class);
+
+        when(employeeRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            employeeService.getEmployeeById(2L);
+        });
+
+        verify(employeeRepository).findById(2L);
+
+    }
+
+    @Test
+    void testGetAllEmployees() {
         mock(EmployeeRepository.class);
         mock(Employee.class);
 
@@ -85,11 +108,62 @@ class EmployeeServiceImplTest {
     }
 
     @Test
-    void updateEmployee() {
+    void TestUpdateEmployeeSuccessfully() {
+        mock(EmployeeRepository.class);
+        mock(Employee.class);
+
+        when(employeeRepository.findById(1L)).thenReturn(Optional.ofNullable(employee));
+        when(employeeRepository.save(any(Employee.class))).thenReturn(employeeUpdated);
+
+        EmployeeDto result = employeeService.updateEmployee(1L, employeeDtoUpdate);
+
+        assertThat(result.getFirstName()).isEqualTo("Valentia");
+        assertThat(result.getLastName()).isEqualTo("Grisecita");
+        assertThat(result.getEmail()).isEqualTo("micorreodegato@gmail.com");
+
+        verify(employeeRepository).findById(1L);
+        verify(employeeRepository).save(employee);
+    }
+
+    @Test
+    void testUpdateEmployeeNotFoundException(){
+        mock(EmployeeRepository.class);
+        mock(Employee.class);
+
+        when(employeeRepository.findById(2L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> {
+            employeeService.updateEmployee(2L, employeeDtoUpdate);
+        });
+
+        verify(employeeRepository).findById(2L);
+        verify(employeeRepository, never()).save(any(Employee.class));
+
+
 
     }
 
     @Test
-    void deleteEmployee() {
+    void testDeleteEmployeeSuccessfully() {
+
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+
+        employeeService.deleteEmployee(1L);
+
+        verify(employeeRepository).findById(1L);
+        verify(employeeRepository).deleteById(1L);
+
+    }
+
+    @Test
+    void testDeleteEmployeeNotFoundException() {
+
+        when(employeeRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            employeeService.deleteEmployee(2L);
+        });
+
+        verify(employeeRepository).findById(2L);
+        verify(employeeRepository, never()).deleteById(anyLong());
     }
 }
