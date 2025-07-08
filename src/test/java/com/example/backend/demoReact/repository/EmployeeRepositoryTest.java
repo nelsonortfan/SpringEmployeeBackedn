@@ -3,8 +3,13 @@ package com.example.backend.demoReact.repository;
 import com.example.backend.demoReact.entity.Employee;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DataJpaTest
 public class EmployeeRepositoryTest {
@@ -17,7 +22,7 @@ public class EmployeeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        employee = new Employee(1L, "Nelson", "Ortiz", "nmortiz@gmail.com" );
+        employee = new Employee(null, "Nelson", "Ortiz", "nmortiz@gmail.com" );
         repository.save(employee);
     }
 
@@ -26,4 +31,21 @@ public class EmployeeRepositoryTest {
         employee = null;
         repository.deleteAll();;
     }
+
+    // Test Case Success
+
+    @Test
+    void testFindByFirstName_Found(){
+        List<Employee> employeesList = repository.findByFirstName("Nelson");
+        assertThat(employeesList.get(0).getId()).isEqualTo(employee.getId());
+        assertThat(employeesList.get(0).getLastName()).isEqualTo(employee.getLastName());
+    }
+
+
+    @Test
+    void prueba(){
+        assertThat(3).isEqualTo(3);
+    }
+
+
 }
