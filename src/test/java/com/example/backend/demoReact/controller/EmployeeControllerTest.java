@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -113,7 +114,32 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void updateEmployee() {
+    void updateEmployee() throws Exception {
+
+        // Simular datos actualizados
+        EmployeeDto updatedDto = new EmployeeDto();
+        updatedDto.setId(1L);
+        updatedDto.setFirstName("MauricioActualizado");
+        updatedDto.setLastName("OrtizActualizado");
+        updatedDto.setEmail("actualizado@gmail.com");
+
+        // Simular el comportamiento del servicio
+        when(employeeService.updateEmployee(eq(1L), any(EmployeeDto.class))).thenReturn(updatedDto);
+
+        this.mockMvc.perform(put("/api/employees/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                {
+                    "firstName": "MauricioActualizado",
+                    "lastName": "OrtizActualizado",
+                    "email": "actualizado@gmail.com"
+                }
+            """))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.email").value("actualizado@gmail.com"));
     }
 
     @Test
