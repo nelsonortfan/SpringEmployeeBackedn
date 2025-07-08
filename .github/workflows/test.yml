@@ -1,0 +1,42 @@
+name: Run Tests with Coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ☕️ Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🧪 Run tests with coverage
+        run: mvn clean verify
+
+      - name: 📊 Check coverage threshold
+        run: |
+          coverage=$(grep -oP 'Total.*?(\d+)%' target/site/jacoco/index.html | grep -oP '\d+(?=%)' | head -n1)
+          echo "Coverage is $coverage%"
+          if [ "$coverage" -lt 80 ]; then
+            echo "❌ Coverage below 80%"
+            exit 1
+          else
+            echo "✅ Coverage meets threshold"
+          fi
+
+      - name: 📤 Upload coverage report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
