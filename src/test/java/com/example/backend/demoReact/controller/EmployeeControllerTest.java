@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -96,6 +97,9 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void deleteEmployee() {
+    void deleteEmployee() throws Exception {
+        doNothing().when(employeeService).deleteEmployee(1L);
+
+        this.mockMvc.perform(delete("/api/employees/1")).andDo(print()).andExpect(status().isOk());
     }
 }
